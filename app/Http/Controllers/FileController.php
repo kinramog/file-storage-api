@@ -67,5 +67,6 @@ class FileController extends Controller
         $user_id = Users::where('token', $token)->first()->id;
         echo $file_id;
         
+        
     }
 }
