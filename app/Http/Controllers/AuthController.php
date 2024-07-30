@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
+    //Регистрация
     public function signup(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -38,6 +39,7 @@ class AuthController extends Controller
         }
     }
 
+    //Авторизация
     public function login(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -53,13 +55,12 @@ class AuthController extends Controller
                 "message" => $validator->errors(),
             ], 422);
         } else {
-            $token = $request->bearerToken();
-            $user = Users::where('token', $token)
-                ->where('email', $data["email"])
+            $user = Users::where('email', $data["email"])
                 ->where('password', $data["password"])
                 ->first();
-
             if ($user) {
+                $token = Str::random(40);
+                Users::where("token", $token)->update(["token" => $token]);
                 return new JsonResponse([
                     "success" => true,
                     "code" => 200,
@@ -74,5 +75,12 @@ class AuthController extends Controller
                 ], 401);
             }
         }
+    }
+
+    public function logout(Request $request)
+    {
+        $token = $request->bearerToken();
+        Users::where("token", $token)->update(["token" => ""]);
+        return response('', 204);
     }
 }
